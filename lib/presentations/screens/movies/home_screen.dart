@@ -1,4 +1,3 @@
-
 import 'package:cinemapedia/presentations/providers/providers.dart';
 import 'package:cinemapedia/presentations/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +12,7 @@ class HomeScreen extends StatelessWidget {
     return const Scaffold(
       body: _HomeView(),
       bottomNavigationBar: CustomBottomNavBar(),
-      );
+    );
   }
 }
 
@@ -39,8 +38,14 @@ class _HomeViewState extends ConsumerState<_HomeView> {
       children: [
         const CustomAppBar(),
         MoviesSlideShow(movies: slideShowMovies),
-        MovieHorizontalListView(movies: nowPlayingMovies, title: 'En Cines', subtitle: 'Lunes 20',)
-
+        MovieHorizontalListView(
+          movies: nowPlayingMovies,
+          title: 'En Cines',
+          subtitle: 'Lunes 20',
+          loadNextpage: () {
+            ref.read(nowPlayingMoviesProvider.notifier).loadNextPage();
+          },
+        )
       ],
     );
   }

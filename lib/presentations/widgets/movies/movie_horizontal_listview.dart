@@ -1,12 +1,15 @@
+import 'package:animate_do/animate_do.dart';
+import 'package:cinemapedia/config/helpers/human_format.dart';
 import 'package:cinemapedia/domain/entities/movie.dart';
 import 'package:cinemapedia/presentations/providers/movies/movies_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MovieHorizontalListView extends StatelessWidget {
+class MovieHorizontalListView extends StatefulWidget {
   final List<Movie> movies;
   final String? title;
   final String? subtitle;
-  final MovieCallBack? loadNextpage;
+  final VoidCallback? loadNextpage;
   const MovieHorizontalListView(
       {super.key,
       required this.movies,
@@ -15,13 +18,144 @@ class MovieHorizontalListView extends StatelessWidget {
       this.loadNextpage});
 
   @override
+  State<MovieHorizontalListView> createState() =>
+      _MovieHorizontalListViewState();
+}
+
+class _MovieHorizontalListViewState extends State<MovieHorizontalListView> {
+  final scrollController = ScrollController();
+  @override
+  void initState() {
+    scrollController.addListener(() {
+      if (widget.loadNextpage == null) return;
+      if (scrollController.position.pixels + 200 >=
+          scrollController.position.maxScrollExtent) {
+        widget.loadNextpage!();
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 350,
       child: Column(children: [
-        if(title!= null || subtitle!= null) _Title(title, subtitle),
-
+        if (widget.title != null || widget.subtitle != null)
+          _Title(widget.title, widget.subtitle),
+        Expanded(
+            child: ListView.builder(
+          controller: scrollController,
+          itemBuilder: (context, index) {
+            return _Slide(movie: widget.movies[index]);
+          },
+          itemCount: widget.movies.length,
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+        ))
       ]),
+    );
+  }
+}
+
+class _Slide extends StatelessWidget {
+  final Movie movie;
+  const _Slide({required this.movie});
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme;
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 150,
+            height: 225,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.network(
+                movie.posterPath,
+                fit: BoxFit.cover,
+                width: 150,
+                height: 225,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress != null) {
+                    return Container(
+                      color: Colors.black38,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 60),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return FadeIn(child: child);
+                },
+              ),
+            ),
+          ),
+          // const SizedBox(
+          //   height: 5,
+          // ),
+          //*Title
+          SizedBox(
+            width: 150,
+            child: Column(
+              children: [
+                Text(
+                  movie.title,
+                  style: textStyle.titleSmall,
+                  maxLines: 2,
+                ),
+                if (movie.title.length < 13)
+                  Text(
+                    movie.title,
+                    style: textStyle.titleSmall?.copyWith(color: Colors.white),
+                  ),
+              ],
+            ),
+          ),
+          //*Rating
+          SizedBox(
+            width: 150,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.star_half_outlined,
+                  color: Colors.yellow.shade800,
+                ),
+                const SizedBox(
+                  width: 3,
+                ),
+                Text(
+                  '${movie.voteAverage}',
+                  style: textStyle.bodyMedium
+                      ?.copyWith(color: Colors.yellow.shade800),
+                ),
+                // const SizedBox(width: 10,),
+                const Spacer(),
+                // Text('${movie.popularity}', style: textStyle.bodySmall)
+                Text(
+                  HumanFormats.number(movie.popularity),
+                  style: textStyle.bodyMedium,
+                )
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 }
@@ -30,7 +164,7 @@ class _Title extends StatelessWidget {
   final String? title;
   final String? subtitle;
   const _Title(this.title, this.subtitle);
-  
+
   @override
   Widget build(BuildContext context) {
     final titleStyle = Theme.of(context).textTheme.titleLarge;
@@ -39,9 +173,18 @@ class _Title extends StatelessWidget {
       margin: EdgeInsets.symmetric(horizontal: 10),
       child: Row(
         children: [
-          if(title != null) Text(title!, style:titleStyle ,),
+          if (title != null)
+            Text(
+              title!,
+              style: titleStyle,
+            ),
           Spacer(),
-          if(subtitle != null) FilledButton.tonal(onPressed: (){},style: const ButtonStyle(visualDensity: VisualDensity.compact), child: Text(subtitle!),),
+          if (subtitle != null)
+            FilledButton.tonal(
+              onPressed: () {},
+              style: const ButtonStyle(visualDensity: VisualDensity.compact),
+              child: Text(subtitle!),
+            ),
         ],
       ),
     );

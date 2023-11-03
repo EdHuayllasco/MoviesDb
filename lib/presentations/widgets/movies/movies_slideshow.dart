@@ -52,6 +52,7 @@ class _Slide extends StatelessWidget {
         decoration: decoration,
         child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
+            // child: Placeholder(),
             child: Image.network(
               movie.backdropPath,
               fit: BoxFit.cover,
@@ -62,7 +63,8 @@ class _Slide extends StatelessWidget {
                 }
                 return FadeIn(child: child);
               },
-            )),
+            )
+            ),
       ),
     );
   }
