@@ -28,16 +28,25 @@ class _HomeViewState extends ConsumerState<_HomeView> {
   void initState() {
     super.initState();
     ref.read(nowPlayingMoviesProvider.notifier).loadNextPage();
+    ref.read(popularMoviesProvider.notifier).loadNextPage();
+    ref.read(upComingMoviesProvider.notifier).loadNextPage();
+    ref.read(topRatedMoviesProvider.notifier).loadNextPage();
   }
 
   @override
   Widget build(BuildContext context) {
     final slideShowMovies = ref.watch(moviesSlideShowProvider);
     final nowPlayingMovies = ref.watch(nowPlayingMoviesProvider);
+    final popularMovies = ref.watch(popularMoviesProvider);
+    final upComingMovies = ref.watch(upComingMoviesProvider);
+    final topRatedMovies = ref.watch(topRatedMoviesProvider);
+    return Placeholder();
     return CustomScrollView(slivers: [
-      SliverAppBar(
+      const SliverAppBar(
         floating: true,
-        flexibleSpace: const FlexibleSpaceBar(title: CustomAppBar(),),
+        flexibleSpace: FlexibleSpaceBar(
+          title: CustomAppBar(),
+        ),
       ),
       SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
@@ -53,27 +62,27 @@ class _HomeViewState extends ConsumerState<_HomeView> {
               },
             ),
             MovieHorizontalListView(
-              movies: nowPlayingMovies,
-              title: 'Proximamente',
+              movies: popularMovies,
+              title: 'Populares',
               subtitle: 'este mes',
               loadNextpage: () {
-                ref.read(nowPlayingMoviesProvider.notifier).loadNextPage();
+                ref.read(popularMoviesProvider.notifier).loadNextPage();
               },
             ),
             MovieHorizontalListView(
-              movies: nowPlayingMovies,
-              title: 'En Cines',
-              subtitle: 'Lunes 20',
+              movies: upComingMovies,
+              title: 'UpComing',
+              subtitle: 'Este mes',
               loadNextpage: () {
-                ref.read(nowPlayingMoviesProvider.notifier).loadNextPage();
+                ref.read(upComingMoviesProvider.notifier).loadNextPage();
               },
             ),
             MovieHorizontalListView(
-              movies: nowPlayingMovies,
-              title: 'En Cines',
-              subtitle: 'Lunes 20',
+              movies: topRatedMovies,
+              title: 'Top Rated',
+              // subtitle: 'Lunes 20',
               loadNextpage: () {
-                ref.read(nowPlayingMoviesProvider.notifier).loadNextPage();
+                ref.read(topRatedMoviesProvider.notifier).loadNextPage();
               },
             ),
             SizedBox(
